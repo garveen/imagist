@@ -28,6 +28,14 @@ imagist new my_packagist
 composer require composer/composer:^1.0@alpha acabin/imagist
 ```
 
+#### Source
+
+```
+git clone git@github.com:acabin/imagist.git
+cd imagist
+composer install
+```
+
 ### Usage
 
 1. Now you have a `public` directory in your site. You can set up a web server as usual, just by using the `public` as root.
