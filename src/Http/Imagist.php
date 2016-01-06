@@ -38,7 +38,7 @@ class Imagist
                 $output = $this->package($matches);
                 break;
             default:
-                echo $pathinfo;exit;
+                $output = "404 Not Found";
         }
         if (isset($output)) {
             if (is_string($output)) {
