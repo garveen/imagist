@@ -1,18 +1,13 @@
 <?php
-
 namespace Acabin\Imagist\Http;
 
-use Illuminate\Http\Request;
-
-use Composer\Console\Application;
-use Composer\IO\ConsoleIO;
-use Symfony\Component\Console\Helper\HelperSet;
 use Composer\Factory;
-use Composer\Repository\CompositeRepository;
+use Composer\DependencyResolver\Pool;
+use Composer\IO\ConsoleIO;
 
+use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Composer\DependencyResolver\Pool;
 
 class Imagist
 {
