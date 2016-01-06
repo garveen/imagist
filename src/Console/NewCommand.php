@@ -45,7 +45,7 @@ class NewCommand extends Command
         	$this->process($commands, $directory, $output);
         }
         mkdir($directory . "/public", 0755, true);
-        copy(ROOT_PATH . '/index.php', $directory . "/public/index.php");
+        copy(ROOT_PATH . '/public/index.php', $directory . "/public/index.php");
 
         $output->writeln('<comment>Here we are! Now you can have a cached composer!</comment>');
 
