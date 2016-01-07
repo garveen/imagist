@@ -32,7 +32,7 @@ vendor/bin/imagist new my_packagist
 #### Source
 
 ```
-git clone git@github.com:acabin/imagist.git
+git clone https://github.com/acabin/imagist.git
 cd imagist
 composer install
 ```
