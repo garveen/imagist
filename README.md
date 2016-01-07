@@ -11,7 +11,7 @@ Due to the Internet connection may not so stable, you want to have a cached `pac
 #### Installer
 
 ```
-composer global require acabin/imagist
+composer global require composer/composer:^1.0@alpha acabin/imagist
 ```
 
 You may have put the  `~/.composer/vendor/bin` directory in your PATH. If not, do so.
@@ -26,6 +26,7 @@ imagist new my_packagist
 
 ```
 composer require composer/composer:^1.0@alpha acabin/imagist
+vendor/bin/imagist new my_packagist
 ```
 
 #### Source
