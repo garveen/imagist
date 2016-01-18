@@ -6,6 +6,7 @@ if (file_exists(__DIR__.'/../../autoload.php')) {
     require __DIR__.'/../vendor/autoload.php';
 }
 define('ROOT_PATH', __DIR__);
+chdir(__DIR__);
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
