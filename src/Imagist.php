@@ -56,23 +56,33 @@ class Imagist
 
     protected function dumpAll()
     {
-        $packagesJson = $this->get('packages.json');
+        $packagesJson = $this->get('packages.json', '', true);
         $packages = json_decode($packagesJson);
         $providers_url = $packages->{"providers-url"};
+        $names = [];
         foreach ($packages->{"provider-includes"} as $key => $hash) {
             $name = str_replace('%hash%', reset($hash), $key);
+            var_dump($name);
+            $names[] = $name;
+            $this->get($name);
+        }
+
+        foreach($names as $name) {
             $include = json_decode($this->get($name));
             foreach ($include->providers as $key => $hash) {
                 $name = ltrim(str_replace(['%hash%', '%package%'], [reset($hash), $key], $providers_url), '/');
                 $this->get($name);
-
             }
         }
     }
 
     protected function get($name, $hash = '', $force = false)
     {
-
+        if(!$force && file_exists($name)) {
+            if(!$hash || $hash == hash($this->encrypt, $content)) {
+                return file_get_contents($name);
+            }
+        }
         if (!file_exists(dirname($name))) {
             mkdir(dirname($name), 0755);
         }
