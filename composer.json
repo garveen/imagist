@@ -1,27 +1,18 @@
 {
-    "name": "acabin/imagist",
+    "name": "garveen/imagist",
     "description": "Image the packagist",
     "keywords": ["image", "proxy", "packagist", "composer"],
-    "config": {
-        "bin-dir": "public"
-    },
+    "type": "project",
     "authors": [
         {
            "name": "Gavin",
            "email": "acabin@live.com"
         }
     ],
-    "require": {
-        "symfony/console": "~2.3|~3.0",
-        "symfony/process": "~2.3|~3.0",
-        "symfony/http-foundation": "~2.3|~3.0",
-        "composer/composer": "^1.0@alpha"
-    },
     "autoload": {
         "psr-4": {
-            "Acabin\\Imagist\\": "src/"
+            "Garveen\\Imagist\\": "src/"
         }
     },
-    "bin": ["imagist"],
     "license": "GPL-2.0"
 }

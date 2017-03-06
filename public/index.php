@@ -1,24 +1,15 @@
 <?php
+require '../src/Imagist.php';
 
-if (file_exists(__DIR__.'/../../autoload.php')) {
-    require __DIR__.'/../../autoload.php';
-} else {
-    require __DIR__.'/../vendor/autoload.php';
-}
-define('ROOT_PATH', __DIR__);
+ini_set('open_basedir', dirname(__DIR__));
 chdir(__DIR__);
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-
-if(PHP_SAPI == 'cli') {
-	$argv[0] = '';
-	$request = Request::create(implode('/', $argv));
-} else {
-	$request = Request::createFromGlobals();
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$uri = ltrim($uri, '/');
+$uri = str_replace('%24', '$', $uri);
+if(file_exists($uri)) {
+	return false;
 }
-
-$response = new Response;
-$imagist = new Acabin\Imagist\Http\Imagist($request, $response);
-$imagist->run();
+$imagist = new Garveen\Imagist\Imagist($uri);
+echo $imagist->run();
 

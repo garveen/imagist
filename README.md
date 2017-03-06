@@ -11,7 +11,7 @@ Due to the Internet connection may not so stable, you want to have a cached `pac
 #### Installer
 
 ```
-composer global require composer/composer:^1.0@alpha acabin/imagist
+composer global require composer/composer:^1.0@alpha garveen/imagist
 ```
 
 You may have put the  `~/.composer/vendor/bin` directory in your PATH. If not, do so.
@@ -25,14 +25,14 @@ imagist new my_packagist
 #### Composer
 
 ```
-composer require composer/composer:^1.0@alpha acabin/imagist
+composer require composer/composer:^1.0@alpha garveen/imagist
 vendor/bin/imagist new my_packagist
 ```
 
 #### Source
 
 ```
-git clone https://github.com/acabin/imagist.git
+git clone https://github.com/garveen/imagist.git
 cd imagist
 composer install
 ```

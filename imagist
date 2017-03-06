@@ -1,11 +1,8 @@
 #!/usr/bin/env php
 <?php
-if (file_exists(__DIR__.'/../../autoload.php')) {
-    require __DIR__.'/../../autoload.php';
-} else {
-    require __DIR__.'/vendor/autoload.php';
-}
-define('ROOT_PATH', __DIR__);
-$app = new Symfony\Component\Console\Application('imagist');
-$app->add(new Acabin\Imagist\Console\NewCommand);
-$app->run();
+
+require 'src/Imagist.php';
+chdir(__DIR__ . '/public');
+
+$imagist = new Garveen\Imagist\Imagist();
+echo $imagist->runCli($argc, $argv);
