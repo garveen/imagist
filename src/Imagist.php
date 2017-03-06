@@ -36,13 +36,6 @@ class Imagist
         return $this->get($filename);
     }
 
-    public static function publish()
-    {
-        mkdir('public', 0755);
-        copy(__DIR__ . '/../public/index.php', 'public/index.php');
-        copy(__DIR__ . '/../imagist', 'imagist');
-    }
-
     protected function dumpAll()
     {
         $packagesJson = $this->get('packages.json');
