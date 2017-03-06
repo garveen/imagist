@@ -7,33 +7,47 @@ use Symfony\Component\Console\Output\BufferedOutput;
 
 class Imagist
 {
-    protected $base = 'https://packagist.org/';
+    public $base = 'https://packagist.org/';
+    public $encrypt = 'sha256';
     protected $uri;
-    protected $requestUri;
-    public function __construct($uri = null)
+    public function __construct()
     {
-        $this->requestUri = $uri;
         if (!file_exists('p')) {
             mkdir('p', 0755);
         }
+        set_error_handler([$this, 'handleError']);
     }
 
     public function runCli($argc, $argv)
     {
-        switch($argv[1]) {
+        switch ($argv[1]) {
             case 'dumpall':
                 $this->dumpAll();
                 return 'done';
             case 'packages':
-                $this->get('packages.json', true);
+                $this->get('packages.json', '', true);
                 return;
         }
     }
 
-    public function run()
+    public function run($uri)
     {
-        $filename = ltrim($this->requestUri, '/');
-        return $this->get($filename);
+        $count = preg_match('~^(.*?)\$([A-Za-z0-9]+)(.+)~', $uri, $matches);
+        $hash = '';
+        if ($count) {
+            $name = $matches[1];
+            $hash = $matches[2];
+            $suffix = $matches[3];
+        }
+
+        return $this->get($uri, $hash);
+    }
+
+    public function handleError($level, $message, $file = '', $line = 0, $context = [])
+    {
+        if (error_reporting() & $level) {
+            throw new \ErrorException($message, 0, $level, $file, $line);
+        }
     }
 
     protected function dumpAll()
@@ -50,39 +64,55 @@ class Imagist
 
             }
         }
-        file_put_contents('packages.json', $packagesJson);
-        return $packagesJson;
     }
 
-    protected function get($name, $force = false)
+    protected function get($name, $hash = '', $force = false)
     {
-        if (!$force && file_exists($name)) {
-            return file_get_contents($name);
-        }
+
         if (!file_exists(dirname($name))) {
             mkdir(dirname($name), 0755);
         }
-        $aContext = array(
-            'http' => array(
-                'proxy' => 'tcp://127.0.0.1:4123',
-                'request_fullname' => true,
-            ),
-        );
-        $cxContext = stream_context_create($aContext);
+        try {
+            if ($proxy = getenv('http_proxy')) {
+                $aContext = array(
+                    'http' => array(
+                        'proxy' => $proxy,
+                        'request_fullname' => true,
+                    ),
+                );
+                $cxContext = stream_context_create($aContext);
 
-        $content = file_get_contents($this->url($name), false, $cxContext);
-        if(!$content) {
+                $content = file_get_contents($this->url($name), false, $cxContext);
+
+            } else {
+                $content = file_get_contents($this->url($name));
+            }
+        } catch (\Exception $e) {
+            $count = preg_match('~\d{3}~', $http_response_header[0], $matches);
+            if (!$count) {
+                header('HTTP/1.0 404 Not Found');
+                return '404 Not Found';
+            } else {
+                header($http_response_header[0]);
+                return strstr($http_response_header[0], ' ');
+            }
+        }
+        if (!$content) {
             return '';
+        }
+        if ($hash && $hash !== hash($this->encrypt, $content)) {
+            header('HTTP/1.0 500');
+            return '500 hash error';
+
         }
         file_put_contents($name, $content);
         return $content;
-
 
     }
 
     protected function url($uri)
     {
-        return $this->base . ltrim($uri, '/');
+        return $this->base . $uri;
     }
 
 }

@@ -10,6 +10,6 @@ $uri = str_replace('%24', '$', $uri);
 if(file_exists($uri)) {
 	return false;
 }
-$imagist = new Garveen\Imagist\Imagist($uri);
-echo $imagist->run();
+$imagist = new Garveen\Imagist\Imagist();
+echo $imagist->run($uri);
 
