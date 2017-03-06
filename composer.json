@@ -14,5 +14,8 @@
             "Garveen\\Imagist\\": "src/"
         }
     },
+    "scripts": {
+        "post-update-cmd": "Garveen\\Imagist\\Imagist::publish"
+    },
     "license": "GPL-2.0"
 }
