@@ -32,6 +32,10 @@ class Imagist
 
     public function run($uri)
     {
+        if($uri == '') {
+            header('Location: https://github.com/garveen/imagist');
+            return;
+        }
         $count = preg_match('~^(.*?)\$([A-Za-z0-9]+)(.+)~', $uri, $matches);
         $hash = '';
         if ($count) {
