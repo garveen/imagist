@@ -8,33 +8,16 @@ Due to the Internet connection may not so stable, you want to have a cached `pac
 
 ### Installation
 
-#### Installer
-
-```
-composer global require composer/composer:^1.0@alpha garveen/imagist
-```
-
-You may have put the  `~/.composer/vendor/bin` directory in your PATH. If not, do so.
-
-Once installed, the `imagist new` command can be used for create your own site.
-
-```
-imagist new my_packagist
-```
-
 #### Composer
 
 ```
-composer require composer/composer:^1.0@alpha garveen/imagist
-vendor/bin/imagist new my_packagist
+composer create-project garveen/imagist imagist
 ```
 
 #### Source
 
 ```
-git clone https://github.com/garveen/imagist.git
-cd imagist
-composer install
+git clone https://github.com/garveen/imagist
 ```
 
 ### Usage
@@ -44,13 +27,17 @@ composer install
 2. Set up a `crontab` job to update the packages.json:
 
 ```
-*/5 * * * * php /path/to/public/index.php packages.json >/dev/null 2>&1
+*/5 * * * * /path/to/imagist packages >/dev/null 2>&1
 ```
 
-3. Configure your `composer` to use this amazing site:
+Or you can dump all jsons by
 
 ```
-composer config [--global] repo.packagist composer https://yoursite
+imagist dumpall
 ```
 
-Notice: You should **NOT** use `imagist` globally on the machine which you run it.
+After all, setup your project using
+
+```
+composer config [--global] repo.packagist composer http://yourwebsite
+```
