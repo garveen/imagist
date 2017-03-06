@@ -25,7 +25,7 @@ class Imagist
                 $this->dumpAll();
                 return 'done';
             case 'packages':
-                $this->get('packages.json');
+                $this->get('packages.json', true);
                 return;
         }
     }
@@ -54,9 +54,9 @@ class Imagist
         return $packagesJson;
     }
 
-    protected function get($name)
+    protected function get($name, $force = false)
     {
-        if (file_exists($name)) {
+        if (!$force && file_exists($name)) {
             return file_get_contents($name);
         }
         if (!file_exists(dirname($name))) {
