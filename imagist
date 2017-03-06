@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-require 'src/Imagist.php';
+require __DIR__ . '/src/Imagist.php';
 chdir(__DIR__ . '/public');
 
 $imagist = new Garveen\Imagist\Imagist();

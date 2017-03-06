@@ -1,5 +1,5 @@
 <?php
-require '../src/Imagist.php';
+require __DIR__ . '/../src/Imagist.php';
 
 ini_set('open_basedir', dirname(__DIR__));
 chdir(__DIR__);
