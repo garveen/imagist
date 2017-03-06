@@ -71,6 +71,7 @@ class Imagist
             $include = json_decode($this->get($name));
             foreach ($include->providers as $key => $hash) {
                 $name = ltrim(str_replace(['%hash%', '%package%'], [reset($hash), $key], $providers_url), '/');
+                var_dump($name);
                 $this->get($name);
             }
         }
