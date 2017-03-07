@@ -20,7 +20,7 @@ class Imagist
 
     public function runCli($argc, $argv)
     {
-        switch ($argv[1]) {
+        switch (strtolower($argv[1])) {
             case 'dumpindex':
                 $this->dumpIndex();
                 return 'done';
@@ -30,6 +30,12 @@ class Imagist
             case 'packages':
                 $this->dumpPackages();
                 return;
+            case 'cleanindex':
+                $this->cleanIndex();
+                return 'done';
+            case 'cleanpackages':
+                $this->cleanPackages();
+                return 'done';
         }
     }
 
@@ -57,7 +63,7 @@ class Imagist
         }
     }
 
-    public function dumpPackages()
+    protected function dumpPackages()
     {
         $packagesJson = $this->get('packages.json', '', true);
         $packages = json_decode($packagesJson);
@@ -87,12 +93,52 @@ class Imagist
 
         foreach ($names as $name) {
             $packages = [];
+            $cleans = [];
             $include = json_decode($this->get($name));
             foreach ($include->providers as $key => $hash) {
                 $name = ltrim(str_replace(['%hash%', '%package%'], [reset($hash), $key], $this->providers_url), '/');
                 $packages[] = $name;
+                $cleans[] = $key;
             }
             $this->multiGet($packages);
+            foreach ($cleans as $clean) {
+                $this->cleanPackages($clean);
+            }
+        }
+        $this->cleanIndex();
+    }
+
+    protected function cleanIndex()
+    {
+        foreach (glob('p/provider-*') as $provider) {
+            if (is_file($provider)) {
+                $providers[strstr($provider, '$', true)][$provider] = filectime($provider);
+            }
+        }
+        $this->filterUnlink($providers);
+    }
+
+    protected function cleanPackages($dir = 'p/*')
+    {
+        foreach (glob($dir) as $provider) {
+            if (is_dir($provider)) {
+                $packages = [];
+                foreach (glob($provider . '/*') as $package) {
+                    $packages[strstr($package, '$', true)][$package] = filectime($package);
+                }
+                $this->filterUnlink($packages);
+            }
+        }
+    }
+
+    protected function filterUnlink($set)
+    {
+        foreach ($set as $list) {
+            arsort($list);
+            foreach (array_slice($list, 2) as $name => $time) {
+                echo "unlink {$name}\n";
+                unlink($name);
+            }
         }
     }
 
