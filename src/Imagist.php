@@ -66,15 +66,15 @@ class Imagist
         }
         $this->multiGet($names);
 
-        $packages = [];
         foreach ($names as $name) {
+            $packages = [];
             $include = json_decode($this->get($name));
             foreach ($include->providers as $key => $hash) {
                 $name = ltrim(str_replace(['%hash%', '%package%'], [reset($hash), $key], $providers_url), '/');
                 $packages[] = $name;
             }
+            $this->multiGet($packages);
         }
-        $this->multiGet($packages);
     }
 
     protected function multiGet($names, $force = false)
