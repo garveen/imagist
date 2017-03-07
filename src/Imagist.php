@@ -28,7 +28,7 @@ class Imagist
                 $this->dumpAll();
                 return 'done';
             case 'packages':
-                $this->get('packages.json', '', true);
+                $this->dumpPackages();
                 return;
         }
     }
@@ -57,11 +57,20 @@ class Imagist
         }
     }
 
-    protected function dumpIndex()
+    public function dumpPackages()
     {
         $packagesJson = $this->get('packages.json', '', true);
         $packages = json_decode($packagesJson);
+        $packages->updated = date(DATE_W3C);
+        file_put_contents('packages.json', json_encode($packages));
         $this->providers_url = $packages->{"providers-url"};
+        return $packages;
+
+    }
+
+    protected function dumpIndex()
+    {
+        $packages = $this->dumpPackages();
         $names = [];
         foreach ($packages->{"provider-includes"} as $key => $hash) {
             $name = str_replace('%hash%', reset($hash), $key);
