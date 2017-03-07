@@ -101,9 +101,7 @@ class Imagist
                 $cleans[] = $key;
             }
             $this->multiGet($packages);
-            foreach ($cleans as $clean) {
-                $this->cleanPackages($clean);
-            }
+            $this->cleanPackages($cleans);
         }
         $this->cleanIndex();
     }
@@ -118,9 +116,12 @@ class Imagist
         $this->filterUnlink($providers);
     }
 
-    protected function cleanPackages($dir = 'p/*')
+    protected function cleanPackages($dir)
     {
-        foreach (glob($dir) as $provider) {
+        if (!is_array($dir)) {
+            $dir = glob($dir);
+        }
+        foreach ($dir as $provider) {
             if (is_dir($provider)) {
                 $packages = [];
                 foreach (glob($provider . '/*') as $package) {
