@@ -32,7 +32,7 @@ class Imagist
 
     public function run($uri)
     {
-        if($uri == '') {
+        if ($uri == '') {
             header('Location: https://github.com/garveen/imagist');
             return;
         }
@@ -62,25 +62,50 @@ class Imagist
         $names = [];
         foreach ($packages->{"provider-includes"} as $key => $hash) {
             $name = str_replace('%hash%', reset($hash), $key);
-            var_dump($name);
             $names[] = $name;
-            $this->get($name);
         }
+        $this->multiGet($names);
 
-        foreach($names as $name) {
+        $packages = [];
+        foreach ($names as $name) {
             $include = json_decode($this->get($name));
             foreach ($include->providers as $key => $hash) {
                 $name = ltrim(str_replace(['%hash%', '%package%'], [reset($hash), $key], $providers_url), '/');
-                var_dump($name);
-                $this->get($name);
+                $packages[] = $name;
             }
+        }
+        $this->multiGet($packages);
+    }
+
+    protected function multiGet($names, $force = false)
+    {
+        $curl = extension_loaded('curl');
+        if ($curl) {
+            $this->multiCurl = new MultiCurl(10);
+            $options = [
+                CURLOPT_SSL_VERIFYPEER => false,
+            ];
+            if ($proxy = getenv('http_proxy')) {
+                $options[CURLOPT_PROXY] = $proxy;
+            }
+
+            $this->multiCurl->setOptions($options);
+            $this->multiCurl->setTimeout(60000);
+        }
+
+        foreach ($names as $name) {
+            $this->get($name, '', $force, $curl);
+        }
+
+        if ($curl) {
+            $this->multiCurl->execute();
         }
     }
 
-    protected function get($name, $hash = '', $force = false)
+    protected function get($name, $hash = '', $force = false, $curl = false)
     {
-        if(!$force && file_exists($name)) {
-            if(!$hash || $hash == hash($this->encrypt, $content)) {
+        if (!$force && file_exists($name)) {
+            if (!$hash || $hash == hash($this->encrypt, $content)) {
                 return file_get_contents($name);
             }
         }
@@ -88,21 +113,47 @@ class Imagist
             mkdir(dirname($name), 0755);
         }
         try {
-            if ($proxy = getenv('http_proxy')) {
-                $aContext = array(
-                    'http' => array(
-                        'proxy' => $proxy,
-                        'request_fullname' => true,
-                    ),
+            if ($curl) {
+                $this->multiCurl->addRequest(
+                    $this->url($name),
+                    null,
+                    function ($response, $url, $request_info, $user_data, $time) use ($name) {
+                        if ($response) {
+                            file_put_contents($name, $response);
+                            echo $name . " wrote\n";
+                        }
+                    }
                 );
-                $cxContext = stream_context_create($aContext);
-
-                $content = file_get_contents($this->url($name), false, $cxContext);
 
             } else {
-                $content = file_get_contents($this->url($name));
+                if ($proxy = getenv('http_proxy')) {
+                    $aContext = array(
+                        'http' => array(
+                            'proxy' => $proxy,
+                            'request_fullname' => true,
+                        ),
+                    );
+                    $cxContext = stream_context_create($aContext);
+
+                    $content = file_get_contents($this->url($name), false, $cxContext);
+
+                } else {
+                    $content = file_get_contents($this->url($name));
+                }
+
+                if (!$content) {
+                    return '';
+                }
+                if ($hash && $hash !== hash($this->encrypt, $content)) {
+                    header('HTTP/1.0 500');
+                    return '500 hash error';
+
+                }
+                file_put_contents($name, $content);
+                return $content;
             }
         } catch (\Exception $e) {
+            echo $e->getTraceAsString();
             $count = preg_match('~\d{3}~', $http_response_header[0], $matches);
             if (!$count) {
                 header('HTTP/1.0 404 Not Found');
@@ -112,16 +163,6 @@ class Imagist
                 return strstr($http_response_header[0], ' ');
             }
         }
-        if (!$content) {
-            return '';
-        }
-        if ($hash && $hash !== hash($this->encrypt, $content)) {
-            header('HTTP/1.0 500');
-            return '500 hash error';
-
-        }
-        file_put_contents($name, $content);
-        return $content;
 
     }
 

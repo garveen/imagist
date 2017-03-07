@@ -2,6 +2,7 @@
 <?php
 
 require __DIR__ . '/src/Imagist.php';
+require __DIR__ . '/src/MultiCurl.php';
 chdir(__DIR__ . '/public');
 
 $imagist = new Garveen\Imagist\Imagist();
