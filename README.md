@@ -27,7 +27,14 @@ git clone https://github.com/garveen/imagist
 2. Set up a `crontab` job to update the packages.json:
 
 ```
-*/5 * * * * /path/to/imagist packages >/dev/null 2>&1
+# only dump packages.json
+*/5 * * * * /path/to/imagist packages
+
+# dump packages.json and all package index
+*/5 * * * * /path/to/imagist dumpindex
+
+# clone whole site
+*/5 * * * * /path/to/imagist dumpall
 ```
 
 Or you can dump all jsons by
@@ -39,5 +46,16 @@ imagist dumpall
 After all, setup your project using
 
 ```
-composer config [--global] repo.packagist composer http://yourwebsite
+composer config [--global] repo.packagist composer https?://yourwebsite
 ```
+
+#### Note
+
+If you have NOT https server, you should use
+
+```
+composer config [--global] repo.packagist composer http://yourwebsite
+composer config [--global] secure-http false
+```
+
+
