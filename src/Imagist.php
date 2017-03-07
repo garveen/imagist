@@ -61,7 +61,7 @@ class Imagist
     {
         $packagesJson = $this->get('packages.json', '', true);
         $packages = json_decode($packagesJson);
-        $providers_url = $packages->{"providers-url"};
+        $this->providers_url = $packages->{"providers-url"};
         $names = [];
         foreach ($packages->{"provider-includes"} as $key => $hash) {
             $name = str_replace('%hash%', reset($hash), $key);
@@ -74,13 +74,13 @@ class Imagist
     protected function dumpAll()
     {
         $names = $this->dumpIndex();
-        array_reverse($names);
+        $names = array_reverse($names);
 
         foreach ($names as $name) {
             $packages = [];
             $include = json_decode($this->get($name));
             foreach ($include->providers as $key => $hash) {
-                $name = ltrim(str_replace(['%hash%', '%package%'], [reset($hash), $key], $providers_url), '/');
+                $name = ltrim(str_replace(['%hash%', '%package%'], [reset($hash), $key], $this->providers_url), '/');
                 $packages[] = $name;
             }
             $this->multiGet($packages);
