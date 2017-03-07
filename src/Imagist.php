@@ -10,6 +10,7 @@ class Imagist
     public $base = 'https://packagist.org/';
     public $encrypt = 'sha256';
     protected $uri;
+    protected $dumps = [];
     public function __construct()
     {
         if (!file_exists('p')) {
@@ -82,8 +83,9 @@ class Imagist
             $name = str_replace('%hash%', reset($hash), $key);
             $names[] = $name;
         }
-        $this->multiGet($names);
-        return $names;
+        $this->dumps = [];
+        $this->multiDump($names);
+        return $this->dumps;
     }
 
     protected function dumpAll()
@@ -98,10 +100,17 @@ class Imagist
             foreach ($include->providers as $key => $hash) {
                 $name = ltrim(str_replace(['%hash%', '%package%'], [reset($hash), $key], $this->providers_url), '/');
                 $packages[] = $name;
-                $cleans[] = $key;
+                $cleans[$name] = $key;
             }
-            $this->multiGet($packages);
-            $this->cleanPackages($cleans);
+            $this->dumps = [];
+            $this->multiDump($packages);
+            $providers = [];
+            foreach($this->dumps as $name) {
+                if(isset($cleans[$name])) {
+                    $providers[] = 'p/' . dirname($cleans[$name]);
+                }
+            }
+            $this->cleanPackages($providers);
         }
         $this->cleanIndex();
     }
@@ -116,7 +125,7 @@ class Imagist
         $this->filterUnlink($providers);
     }
 
-    protected function cleanPackages($dir)
+    protected function cleanPackages($dir = 'p/*')
     {
         if (!is_array($dir)) {
             $dir = glob($dir);
@@ -143,7 +152,7 @@ class Imagist
         }
     }
 
-    protected function multiGet($names, $force = false)
+    protected function multiDump($names, $force = false)
     {
         $curl = extension_loaded('curl');
         if ($curl) {
@@ -160,7 +169,7 @@ class Imagist
         }
 
         foreach ($names as $name) {
-            $this->get($name, '', $force, $curl);
+            $this->dumpFile($name, '', $force, $curl);
         }
 
         if ($curl) {
@@ -168,12 +177,22 @@ class Imagist
         }
     }
 
-    protected function get($name, $hash = '', $force = false, $curl = false)
+    protected function get($name, $hash = '', $force = false)
     {
         if (!$force && file_exists($name)) {
+            $content = file_get_contents($name);
             if (!$hash || $hash == hash($this->encrypt, $content)) {
-                return file_get_contents($name);
+                return $content;
             }
+        }
+        $this->dumpFile($name, $hash, $force);
+        return file_get_contents($name);
+    }
+
+    protected function dumpFile($name, $hash = '', $force = false, $curl = false)
+    {
+        if (!$force && file_exists($name)) {
+            return false;
         }
         if (!file_exists(dirname($name))) {
             mkdir(dirname($name), 0755);
@@ -185,6 +204,7 @@ class Imagist
                     null,
                     function ($response, $url, $request_info, $user_data, $time) use ($name) {
                         if ($response) {
+                            $this->dumps[] = $name;
                             file_put_contents($name, $response);
                             echo $name . " wrote\n";
                         }
@@ -208,25 +228,25 @@ class Imagist
                 }
 
                 if (!$content) {
-                    return '';
+                    return false;
                 }
                 if ($hash && $hash !== hash($this->encrypt, $content)) {
-                    header('HTTP/1.0 500');
-                    return '500 hash error';
-
+                    $this->error(500, 'hash error');
                 }
                 file_put_contents($name, $content);
-                return $content;
+                echo $name . " wrote\n";
+                return true;
             }
         } catch (\Exception $e) {
-            echo $e->getTraceAsString();
-            $count = preg_match('~\d{3}~', $http_response_header[0], $matches);
-            if (!$count) {
-                header('HTTP/1.0 404 Not Found');
-                return '404 Not Found';
+            if (isset($http_response_header)) {
+                $code = preg_match('~\d{3}~', $http_response_header[0], $matches);
+                if (!$code) {
+                    $this->error(404, 'Not Found');
+                } else {
+                    $this->error($code, strstr($http_response_header[0], ' '));
+                }
             } else {
-                header($http_response_header[0]);
-                return strstr($http_response_header[0], ' ');
+                $this->error(500, 'Internel Error');
             }
         }
 
@@ -235,6 +255,13 @@ class Imagist
     protected function url($uri)
     {
         return $this->base . $uri;
+    }
+
+    protected function error($code, $message)
+    {
+        header("HTTP/1.0 {$code}");
+        echo $code . ' ' . $message;
+        exit;
     }
 
 }
