@@ -21,6 +21,9 @@ class Imagist
     public function runCli($argc, $argv)
     {
         switch ($argv[1]) {
+            case 'dumpindex':
+                $this->dumpIndex();
+                return 'done';
             case 'dumpall':
                 $this->dumpAll();
                 return 'done';
@@ -54,7 +57,7 @@ class Imagist
         }
     }
 
-    protected function dumpAll()
+    protected function dumpIndex()
     {
         $packagesJson = $this->get('packages.json', '', true);
         $packages = json_decode($packagesJson);
@@ -65,6 +68,13 @@ class Imagist
             $names[] = $name;
         }
         $this->multiGet($names);
+        return $names;
+    }
+
+    protected function dumpAll()
+    {
+        $names = $this->dumpIndex();
+        array_reverse($names);
 
         foreach ($names as $name) {
             $packages = [];
