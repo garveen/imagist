@@ -91,7 +91,7 @@ class Imagist
     {
         $curl = extension_loaded('curl');
         if ($curl) {
-            $this->multiCurl = new MultiCurl(10);
+            $this->multiCurl = new MultiCurl(100);
             $options = [
                 CURLOPT_SSL_VERIFYPEER => false,
             ];
